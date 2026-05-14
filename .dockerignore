@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+*.pyo
+*.sqlite
+screenshots/
+*.docx
+README.md
+Makefile
+.git
+.gitignore

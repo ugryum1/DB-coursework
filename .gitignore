@@ -1,0 +1,32 @@
+# --- сгенерированные артефакты ---
+reports/
+screenshots/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# --- IDE / редакторы ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# --- Office tempfiles ---
+~$*
+
+# --- Docker ---
+.env
+.env.local
+
+# --- локальная БД ---
+*.sqlite
+*.sqlite-journal
+
+# --- логи ---
+*.log

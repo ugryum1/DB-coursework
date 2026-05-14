@@ -1,0 +1,55 @@
+name: dietplan
+
+services:
+  db:
+    image: mirror.gcr.io/library/postgres:14-alpine
+    container_name: dietplan-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dietplan
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - dietplan_pgdata:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dietplan"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    container_name: dietplan-app
+    depends_on:
+      db:
+        condition: service_healthy
+    # stdin/tty чтобы контейнер не падал из-за отсутствия GUI и было видно логи
+    stdin_open: true
+    tty: true
+    environment:
+      DISPLAY: ${DISPLAY:-:0}
+      WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-}
+      XDG_RUNTIME_DIR: ${XDG_RUNTIME_DIR:-/tmp}
+      PULSE_SERVER: ${PULSE_SERVER:-}
+      QT_X11_NO_MITSHM: "1"
+      # Forces XCB plugin (а не Wayland) — стабильнее в WSLg
+      QT_QPA_PLATFORM: xcb
+      PGHOST: db
+      PGPORT: "5432"
+      PGDATABASE: dietplan
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    volumes:
+      # X11-сокет хоста
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      # WSLg-каталог (на чистом Linux его нет — bind будет создан пустым, не мешает)
+      - /mnt/wslg:/mnt/wslg
+      - ./app/config.docker.json:/app/app/config.json:ro
+      # каталог для сохранения PDF-отчётов (виден на хосте как kypca4/reports/)
+      - ./reports:/app/reports
+
+volumes:
+  dietplan_pgdata:
